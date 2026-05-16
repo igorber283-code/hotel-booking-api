@@ -1,201 +1,221 @@
-# 🚀 Professional Backend Portfolio Project
-
-## 🧩 Key Improvements (Professional Upgrade)
-- Added **API response examples** for faster evaluation by reviewers
-- Improved **project positioning for senior/backend roles**
-- Structured **deployment & architecture clarity**
-- Enhanced **readability for recruiters and engineers**
-- Standardized **documentation style (production-grade README)**
-
----
-
 # 🏨 Hotel Booking API
 
-A robust, high-performance backend booking system built with **FastAPI**, **PostgreSQL**, and **Async SQLAlchemy**. This project demonstrates expertise in asynchronous Python programming, database transaction management, and concurrency control.
+A robust, high-performance backend booking system built with **FastAPI**, **PostgreSQL**, and **Async SQLAlchemy**. This project demonstrates production-grade expertise in asynchronous Python programming, database transaction management, enterprise-level containerization, and pessimistic concurrency control.
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Framework:** FastAPI
-- **Database:** PostgreSQL
-- **ORM:** SQLAlchemy (Asynchronous)
+- **Framework:** FastAPI (Asynchronous)
+- **Database:** PostgreSQL (explicit connection pooling)
+- **ORM:** SQLAlchemy 2.0 (Async Engine & Declarative Mapping)
 - **Migrations:** Alembic
-- **Authentication:** JWT via AuthX
+- **Authentication:** JWT (AuthX / custom JOSE implementation)
 - **Validation:** Pydantic v2
-- **Testing:** Pytest (Integration & Concurrency)
-- **Containerization:** Docker & Docker Compose
+- **Testing:** Pytest (integration, async & concurrency stress tests)
+- **Containerization:** Docker & Docker Compose (multi-container setup)
 
 ---
 
-## 📌 Features
+## 📌 Key Features & Engineering Highlights
 
 ### 🔐 Authentication & Security
-- Secure user registration and JWT-based login flow
-- Role-based access control (RBAC) for protected endpoints
-- Password hashing and secure token management
+
+- Secure user registration and JWT-based stateless authentication
+- Role-Based Access Control (RBAC)
+- Password hashing with **bcrypt**
+- Automated access/refresh token lifecycle management
 
 ### 🏨 Hotel & Room Management
-- Dynamic hotel listings with advanced filtering
-- Real-time room availability searching
-- Structured room classification and automated pricing logic
 
-### 📅 Advanced Booking Engine
-- **Atomic Transactions:** Prevents double bookings using `SELECT ... FOR UPDATE` row-level locking
-- **Validation:** Strict date range validation and overlap checks
-- **Concurrency Control:** Designed to handle high-load scenarios where multiple users attempt to book the same room simultaneously
+- Dynamic hotel listings with advanced filtering and search
+- Real-time room availability calculation
+- Structured room classification
+- Automated seasonal pricing logic
 
-### 🧪 Quality Assurance
-- **Integration Tests:** End-to-end API flow validation
-- **Concurrency Tests:** Specialized stress tests to ensure race-condition protection works under load
+### 📅 Advanced Booking Engine & Concurrency Control
+
+- **Atomic transactions** using pessimistic locking (`SELECT ... FOR UPDATE`)
+- Strict validation of booking date ranges (`date_from < date_to`)
+- Guaranteed prevention of overlapping and double bookings
+- Designed to safely handle high-load concurrent booking attempts
 
 ---
 
-## 🧠 Architecture
+## 🧠 Software Architecture
 
-The project follows a modular architecture for scalability and maintainability:
+The project follows a scalable **Layered Modular Architecture**, aligned with enterprise backend standards.
 
 ```text
 app/
-├── api/          # FastAPI routers and endpoint definitions
-├── services/     # Business logic layer
-├── dao/          # Data Access Objects (Database interaction)
+├── api/          # FastAPI routers, endpoints, dependencies
+├── services/     # Business logic layer (rules, pricing, validations)
+├── dao/          # Data Access Objects (isolated DB operations)
 ├── models/       # SQLAlchemy declarative models
-├── schemas/      # Pydantic models for request/response validation
-├── core/         # Configuration, database setup, and security utilities
-└── exceptions/   # Custom application-specific exceptions
+├── schemas/      # Pydantic request/response schemas
+├── core/         # Configuration, database, security utilities
+└── exceptions/   # Domain-specific custom exceptions
 ```
 
 ---
 
-## ⚙️ Getting Started
+## ⚠️ Concurrency & Data Integrity Model
 
-### 1. Clone the Repository
+To eliminate any chance of overbooking, the system enforces **strict pessimistic locking** at the database level.
 
-```bash
-git clone https://github.com/your_username/booking-api.git
-cd booking-api
+When a booking request is initiated, the target room row is locked within an atomic transaction:
+
+```python
+# Service layer snippet enforcing strict isolation
+stmt = select(Rooms).where(Rooms.id == room_id).with_for_update()
 ```
 
-### 2. Configure Environment Variables
+If two concurrent requests attempt to book the same room at the same millisecond, the second transaction is forced to wait until the first transaction completes (COMMIT or ROLLBACK), ensuring **absolute data consistency**.
 
-Create a `.env` file in the root directory:
+---
 
-```env
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_HOST=localhost
+## ⚙️ Getting Started & Deployment
+
+The deployment pipeline is fully automated using Docker.
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/igorber283-code/hotel-booking-api.git
+cd hotel-booking-api
+```
+
+### 2️⃣ Configure Environment Variables
+
+Create a `.env` file in the project root (**never commit this file**):
+
+```ini
+POSTGRES_USER=lslsl
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_HOST=db
 POSTGRES_PORT=5432
-POSTGRES_DB=booking_db
+POSTGRES_DB=booking
 
-SECRET_KEY=your_super_secret_key
+POSTGRES_TEST_DB=booking_test
+
+SECRET_KEY=your_super_secret_production_key_hash
 ALGORITHM=HS256
 ```
 
-### 3. Deploy with Docker
+### 3️⃣ Start the Containers
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
-### 4. Run Migrations
+> 💡 **Automation Note:**
+> The backend container waits for PostgreSQL readiness using `pg_isready`, automatically applies all Alembic migrations (`alembic upgrade head`), and starts the Uvicorn server — no manual steps required.
 
-```bash
-docker-compose exec app alembic upgrade head
-```
-
-### 5. Access the API
+### 4️⃣ Access the Application
 
 - **Base URL:** http://127.0.0.1:8000
-- **Interactive Docs (Swagger):** http://127.0.0.1:8000/docs
+- **Swagger UI:** http://127.0.0.1:8000/docs
 
 ---
 
-## 🧪 Testing
+## 🧪 Quality Assurance & Testing
 
-Run the full test suite (including stress tests).
-
-This project uses a separate PostgreSQL database for tests.
+The project includes a fully isolated testing environment.
 
 ### Databases
-- **booking** — main (development/production) database
-- **booking_test** — database used only for automated tests
 
-The test database is completely isolated from the main database and does not contain production data.
+- `booking` — development / production
+- `booking_test` — isolated test database
 
-### How Tests Are Run
-
-Tests are intended to be executed inside Docker containers.
-
-Run tests with:
+### Run Tests Inside Docker Network
 
 ```bash
 docker compose exec backend pytest
 ```
 
-### Why Tests Must Be Run in Docker
+### Test Coverage
 
-Running pytest directly on the host machine is not supported by default, because:
-- PostgreSQL is running inside a Docker container
-- Test credentials and connection settings are defined in docker-compose.yml
-- The test database (`booking_test`) exists inside the Docker environment
-- Async database connections rely on Docker networking
-
-If pytest is executed locally without Docker, database connection errors may occur.
-
-### Test Database Setup
-
-The test database must exist before running tests.
-
-It can be created with:
-
-```bash
-docker compose exec db psql -U user -d postgres -c "CREATE DATABASE booking_test;"
-```
-
-### Notes
-- Tests use an isolated database (`booking_test`)
-- All tests passed successfully when executed inside Docker
-- The test environment is safe and does not affect production data
-
-```bash
-pytest
-```
-
-The testing suite includes:
-- **Auth Flow:** Registration and login cycles
-- **Race Conditions:** Simulating parallel booking requests to verify locking mechanisms
-- **Integration:** Verifying the interaction between FastAPI, SQLAlchemy, and PostgreSQL
+- Authentication flows (registration, login, token validation)
+- Integration tests (FastAPI → PostgreSQL → FastAPI)
+- Concurrency stress tests (50+ parallel booking attempts)
+- Validation of pessimistic locking behavior
 
 ---
 
-## ⚠️ Concurrency Model
+## 📊 API Response Examples
 
-To ensure data integrity, the system implements a **pessimistic locking** strategy. During a booking request, the specific room record is locked within a transaction:
+### 1️⃣ User Registration
 
-```python
-stmt = select(Rooms).where(Rooms.id == room_id).with_for_update()
+**POST** `/api/v1/auth/register`
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 42,
+    "email": "developer@example.com"
+  }
+}
 ```
 
-This ensures that if two requests arrive at the same millisecond, the second request waits for the first to commit or rollback, effectively preventing overbooking.
+### 2️⃣ Hotel Search
+
+**GET** `/api/v1/hotels?location=Moscow&date_from=2026-06-01&date_to=2026-06-10`
+
+```json
+[
+  {
+    "id": 3,
+    "name": "Метрополь",
+    "location": "Москва, Театральный проезд, 2",
+    "rooms_count": 150,
+    "available_rooms": 14
+  }
+]
+```
+
+### 3️⃣ Create Booking
+
+**POST** `/api/v1/bookings`
+
+```json
+{
+  "room_id": 12,
+  "date_from": "2026-06-01",
+  "date_to": "2026-06-05"
+}
+```
+
+```json
+{
+  "booking_id": 1048,
+  "room_id": 12,
+  "user_id": 42,
+  "date_from": "2026-06-01",
+  "date_to": "2026-06-05",
+  "price_per_night": 6500,
+  "total_cost": 26000,
+  "total_days": 4,
+  "status": "confirmed"
+}
+```
 
 ---
 
-## 📈 Future Roadmap
+## 📈 Production Roadmap
 
-- [ ] **Caching:** Integrate Redis for hotel listing and room availability
-- [ ] **Rate Limiting:** Protect endpoints from abuse
-- [ ] **Background Tasks:** Use Celery for booking confirmation emails
-- [ ] **Payments:** Stripe or PayPal integration
-- [ ] **Observability:** Prometheus and Grafana monitoring
+- [ ] Redis caching layer for hotel search
+- [ ] Rate limiting for auth endpoints
+- [ ] Background tasks (Celery + Redis) for email notifications
+- [ ] Observability: Prometheus & Grafana metrics
 
 ---
 
 ## 👤 Author
 
-Developed as a professional portfolio project focusing on:
-- Asynchronous Python Backend Development
-- High-integrity Transactional Systems
-- Scalable Database Design
-- Concurrency & Stress Testing Strategies
+Developed as a **professional portfolio project** with a focus on:
+
+- Asynchronous Python architecture
+- High-integrity transactional systems
+- Secure, production-ready Docker deployments
 
