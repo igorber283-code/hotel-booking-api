@@ -1,5 +1,10 @@
 # 🏨 Hotel Booking API
 
+![Docker](https://img.shields.io/badge/Docker-containerized-blue?style=flat-square&logo=docker)
+![Pytest](https://img.shields.io/badge/Tests-8%20passed%20%2F%20100%25-success?style=flat-square&logo=pytest)
+![Deployment](https://img.shields.io/badge/Deployment-VPS%20%7C%20Live-orange?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=flat-square)
+
 A robust, high-performance backend booking system built with **FastAPI**, **PostgreSQL**, and **Async SQLAlchemy**. This project demonstrates production-grade expertise in asynchronous Python programming, database transaction management, enterprise-level containerization, and pessimistic concurrency control.
 
 ---
