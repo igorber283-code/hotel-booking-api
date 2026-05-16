@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
 
     POSTGRES_DB: str
-    POSTGRES_TEST_DB: Optional[str] = None  # 👈 важно
+    POSTGRES_TEST_DB: Optional[str] = None
 
     SECRET_KEY: str
     ALGORITHM: str

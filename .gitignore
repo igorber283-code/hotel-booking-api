@@ -1,4 +1,4 @@
-# Python
+
 __pycache__/
 *.pyc
 *.pyo
@@ -10,18 +10,20 @@ htmlcov/
 venv/
 ENV/
 
-# Databases & Local storage
+
 *.db
 *.sqlite3
-postgres_data/  # если ты мапишь volumes из Docker сюда
+postgres_data/
 
-# Environments & Secrets
+
 .env
 .env.prod
 .env.local
 
-# IDEs
+
 .vscode/
 .idea/
 *.swp
 *.swo
+
+.docker/

@@ -1,13 +1,12 @@
-
 services:
   db:
     image: postgres:15
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: lslsl
-      POSTGRES_PASSWORD: 1100509604
-      POSTGRES_DB: booking
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -20,6 +19,8 @@ services:
       - db
     env_file:
       - .env
+    environment:
+      - POSTGRES_HOST=db
     ports:
       - "8000:8000"
     volumes:
@@ -27,7 +28,7 @@ services:
     command: >
       sh -c "
       until pg_isready -h db -p 5432; do
-        echo 'waiting for postgres...';
+        echo 'Waiting for PostgreSQL...';
         sleep 1;
       done;
       alembic upgrade head &&
