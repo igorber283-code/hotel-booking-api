@@ -5,6 +5,10 @@
 ![Deployment](https://img.shields.io/badge/Deployment-VPS%20%7C%20Live-orange?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=flat-square)
 
+
+🔗 Live Demo (Swagger UI):http://92.246.137.125:8000/docs#/
+
+
 A robust, high-performance backend booking system built with **FastAPI**, **PostgreSQL**, and **Async SQLAlchemy**. This project demonstrates production-grade expertise in asynchronous Python programming, database transaction management, enterprise-level containerization, and pessimistic concurrency control.
 
 ---
