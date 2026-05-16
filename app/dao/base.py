@@ -22,7 +22,7 @@ class BaseDAO:
         obj = cls.model(**data)
 
         session.add(obj)
-        await session.flush()  # получить id
+        await session.flush()
         await session.refresh(obj)
 
         return obj
