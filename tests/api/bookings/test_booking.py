@@ -8,7 +8,7 @@ async def test_create_booking(ac, test_room):
         "/authx/register",
         json={
             "email": "booking_test@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -16,7 +16,7 @@ async def test_create_booking(ac, test_room):
         "/authx/login",
         json={
             "email": "booking_test@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 

@@ -19,3 +19,5 @@ authx
 pytest
 pytest-asyncio
 httpx
+
+redis>=5.0.0

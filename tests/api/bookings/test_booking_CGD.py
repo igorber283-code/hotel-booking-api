@@ -8,7 +8,7 @@ async def test_create_booking(ac, test_room):
         "/authx/register",
         json={
             "email": "booking_test@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -16,7 +16,7 @@ async def test_create_booking(ac, test_room):
         "/authx/login",
         json={
             "email": "booking_test@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -44,7 +44,7 @@ async def test_get_my_bookings(ac, test_room):
         "/authx/register",
         json={
             "email": "my_bookings@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -52,7 +52,7 @@ async def test_get_my_bookings(ac, test_room):
         "/authx/login",
         json={
             "email": "my_bookings@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -87,7 +87,7 @@ async def test_delete_booking(ac, test_room):
         "/authx/register",
         json={
             "email": "delete_booking@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -95,7 +95,7 @@ async def test_delete_booking(ac, test_room):
         "/authx/login",
         json={
             "email": "delete_booking@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -123,7 +123,7 @@ async def test_create_booking_with_invalid_dates(ac, test_room):
         "/authx/register",
         json={
             "email": "invalid_dates@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 
@@ -131,7 +131,7 @@ async def test_create_booking_with_invalid_dates(ac, test_room):
         "/authx/login",
         json={
             "email": "invalid_dates@example.com",
-            "password": "password123",
+            "password": "Password123!",
         },
     )
 

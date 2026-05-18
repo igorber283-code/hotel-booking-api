@@ -12,15 +12,24 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
   backend:
     build: .
     container_name: fastapi_app
     depends_on:
       - db
+      - redis
     env_file:
       - .env
     environment:
-      - POSTGRES_HOST=db
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
     ports:
       - "8000:8000"
     volumes:

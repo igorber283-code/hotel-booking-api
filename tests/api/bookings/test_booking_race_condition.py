@@ -6,7 +6,7 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_booking_race_condition(ac: AsyncClient, test_room):
 
-    user_data = {"email": "race_test@example.com", "password": "password123"}
+    user_data = {"email": "race_test@example.com", "password": "Password123!"}
     await ac.post("/authx/register", json=user_data)
     login_res = await ac.post("/authx/login", json=user_data)
     token = login_res.json()["access_token"]

@@ -1,18 +1,17 @@
-from datetime import date
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from app.core.database import get_session
-from app.dao.rooms import RoomDAO
-from app.schemas.rooms import SRoomInfo
-from app.exceptions import RoomNotAvailableException
+from app.services.rooms import RoomService
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 
-@router.get("/rooms", response_model=list[SRoomInfo])
+@router.get("")
 async def get_rooms(
     hotel_id: int | None = Query(None),
+    room_id: int | None = Query(None),
     class_room: str | None = Query(None),
     price: int | None = Query(None),
     date_from: date | None = Query(None),
@@ -21,9 +20,10 @@ async def get_rooms(
     offset: int = Query(0, ge=0),
     session: AsyncSession = Depends(get_session),
 ):
-    rooms = await RoomDAO.find_filtered(
+    return await RoomService.get_rooms(
         session=session,
         hotel_id=hotel_id,
+        room_id=room_id,
         class_room=class_room,
         price=price,
         date_from=date_from,
@@ -31,8 +31,3 @@ async def get_rooms(
         limit=limit,
         offset=offset,
     )
-
-    if not rooms:
-        raise RoomNotAvailableException()
-
-    return rooms

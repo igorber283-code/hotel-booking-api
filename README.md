@@ -1,13 +1,12 @@
 # 🏨 Hotel Booking API
 
 ![Docker](https://img.shields.io/badge/Docker-containerized-blue?style=flat-square&logo=docker)
-![Pytest](https://img.shields.io/badge/Tests-8%20passed%20%2F%20100%25-success?style=flat-square&logo=pytest)
+![Pytest](https://img.shields.io/badge/Tests-10%20passed%20%2F%20100%25-success?style=flat-square&logo=pytest)
 ![Deployment](https://img.shields.io/badge/Deployment-VPS%20%7C%20Live-orange?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=flat-square)
 
 
-🔗 Live Demo (Swagger UI):http://92.246.137.125:8000/docs#/
-
+🔗 Live Demo (Swagger UI): http://92.246.137.125:8000/docs#/
 
 A robust, high-performance backend booking system built with **FastAPI**, **PostgreSQL**, and **Async SQLAlchemy**. This project demonstrates production-grade expertise in asynchronous Python programming, database transaction management, enterprise-level containerization, and pessimistic concurrency control.
 
@@ -17,11 +16,12 @@ A robust, high-performance backend booking system built with **FastAPI**, **Post
 
 - **Framework:** FastAPI (Asynchronous)
 - **Database:** PostgreSQL (explicit connection pooling)
+- **Caching & In-Memory Storage:** Redis
 - **ORM:** SQLAlchemy 2.0 (Async Engine & Declarative Mapping)
 - **Migrations:** Alembic
 - **Authentication:** JWT (AuthX / custom JOSE implementation)
 - **Validation:** Pydantic v2
-- **Testing:** Pytest (integration, async & concurrency stress tests)
+- **Testing:** Pytest (integration, async & concurrency/cancellation stress tests)
 - **Containerization:** Docker & Docker Compose (multi-container setup)
 
 ---
@@ -39,6 +39,7 @@ A robust, high-performance backend booking system built with **FastAPI**, **Post
 
 - Dynamic hotel listings with advanced filtering and search
 - Real-time room availability calculation
+- High-performance caching layer using **Redis** for search queries to reduce DB load
 - Structured room classification
 - Automated seasonal pricing logic
 
@@ -55,14 +56,14 @@ A robust, high-performance backend booking system built with **FastAPI**, **Post
 
 The project follows a scalable **Layered Modular Architecture**, aligned with enterprise backend standards.
 
-```text
+```
 app/
 ├── api/          # FastAPI routers, endpoints, dependencies
-├── services/     # Business logic layer (rules, pricing, validations)
+├── services/     # Business logic layer (rules, pricing, validations, caching)
 ├── dao/          # Data Access Objects (isolated DB operations)
 ├── models/       # SQLAlchemy declarative models
 ├── schemas/      # Pydantic request/response schemas
-├── core/         # Configuration, database, security utilities
+├── core/         # Configuration, database, security, redis utilities
 └── exceptions/   # Domain-specific custom exceptions
 ```
 
@@ -75,7 +76,6 @@ To eliminate any chance of overbooking, the system enforces **strict pessimistic
 When a booking request is initiated, the target room row is locked within an atomic transaction:
 
 ```python
-# Service layer snippet enforcing strict isolation
 stmt = select(Rooms).where(Rooms.id == room_id).with_for_update()
 ```
 
@@ -96,19 +96,26 @@ cd hotel-booking-api
 
 ### 2️⃣ Configure Environment Variables
 
-Create a `.env` file in the project root (**never commit this file**):
+Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
 
 ```ini
-POSTGRES_USER=lslsl
-POSTGRES_PASSWORD=your_secure_password
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=db
 POSTGRES_PORT=5432
-POSTGRES_DB=booking
+POSTGRES_DB=booking_db
 
 POSTGRES_TEST_DB=booking_test
 
-SECRET_KEY=your_super_secret_production_key_hash
+SECRET_KEY=change_me_in_production
 ALGORITHM=HS256
+
+REDIS_HOST=redis
+REDIS_PORT=6379
 ```
 
 ### 3️⃣ Start the Containers
@@ -129,14 +136,22 @@ docker compose up -d --build
 
 ## 🧪 Quality Assurance & Testing
 
-The project includes a fully isolated testing environment.
+The project includes a fully isolated testing environment with extensive coverage.
 
 ### Databases
 
-- `booking` — development / production
+- `booking_db` — development / production
 - `booking_test` — isolated test database
 
 ### Run Tests Inside Docker Network
+
+### 1. Prepare the test database (Required only once before the first test run):
+
+```bash
+docker compose exec db psql -U postgres -d booking_db -c "CREATE DATABASE booking_test;"
+```
+
+### 2. Run the test suite:
 
 ```bash
 docker compose exec backend pytest
@@ -146,8 +161,10 @@ docker compose exec backend pytest
 
 - Authentication flows (registration, login, token validation)
 - Integration tests (FastAPI → PostgreSQL → FastAPI)
-- Concurrency stress tests (50+ parallel booking attempts)
+- Concurrency stress tests (50+ parallel booking attempts checked for Race Condition)
+- Cancellation stress tests (50+ parallel requests for deleting the same booking)
 - Validation of pessimistic locking behavior
+- Robust Redis mock context ensuring tests remain data-isolated
 
 ---
 
@@ -212,11 +229,10 @@ docker compose exec backend pytest
 ---
 
 ## 📈 Production Roadmap
-
-- [ ] Redis caching layer for hotel search
-- [ ] Rate limiting for auth endpoints
-- [ ] Background tasks (Celery + Redis) for email notifications
-- [ ] Observability: Prometheus & Grafana metrics
+- [✅] Redis caching layer for hotel search
+- [  ] Rate limiting for auth endpoints
+- [  ] Background tasks (Celery + Redis) for email notifications
+- [  ] Observability: Prometheus & Grafana metrics
 
 ---
 

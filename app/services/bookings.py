@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao.bookings import BookingDAO
 from app.dao.rooms import RoomDAO
 from app.models.rooms import Room
+from app.core.redis import redis_client
 
 from app.exceptions import (
     InvalidBookingDatesException,
@@ -46,7 +47,7 @@ class BookingService:
         )
 
         if not available_rooms:
-            raise RoomNotAvailableException()
+            raise RoomNotAvailableException("Комната недоступна на выбранные даты")
 
         total_days = (date_to - date_from).days
         total_cost = total_days * room.price
@@ -63,6 +64,10 @@ class BookingService:
         )
 
         await session.commit()
+
+        # Invalidate cached room lists for this hotel after booking
+        async for key in redis_client.scan_iter(match=f"rooms:hotel:{room.hotel_id}:*"):
+            await redis_client.delete(key)
 
         return booking
 
